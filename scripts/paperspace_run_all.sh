@@ -10,10 +10,14 @@ export OMP_NUM_THREADS="${OMP_NUM_THREADS:-4}"
 
 echo "==> Project root: $ROOT"
 echo "==> Python: $(python --version)"
-python -c "import torch; print('CUDA:', torch.cuda.is_available(), getattr(torch.cuda, 'get_device_name', lambda *_: 'n/a')(0) if torch.cuda.is_available() else '')" || true
 
-echo "==> Install dependencies (skip if already installed)"
-pip install -q -r requirements.txt
+echo "==> Install dependencies (Paperspace: no torch in requirements-paperspace.txt)"
+pip install -q -U pip wheel
+pip install -q -r requirements-paperspace.txt
+
+echo "==> Fix / install PyTorch (GPU)"
+chmod +x scripts/fix_paperspace_torch.sh
+./scripts/fix_paperspace_torch.sh
 
 DATA_SOURCE="${DATA_SOURCE:-bnci}"
 if [ "$DATA_SOURCE" = "synthetic" ]; then

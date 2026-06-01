@@ -18,7 +18,8 @@ git clone git@github.com:manuelquistial/modelo_bilstm.git
 cd modelo_bilstm
 python3 -m venv .venv && source .venv/bin/activate
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
-pip install -r requirements.txt
+pip install -r requirements-paperspace.txt
+./scripts/fix_paperspace_torch.sh
 export PYTHONPATH="${PWD}:${PYTHONPATH}"
 ./scripts/paperspace_run_all.sh
 ```

@@ -1,9 +1,16 @@
-# Paperspace / GPU: install PyTorch with CUDA first, then this file.
-# Example:
-#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
-#   pip install -r requirements-paperspace.txt
-
--r requirements.txt
-
-# Headless: no display for pygame acquisition
-# pygame still listed in requirements.txt for optional local acquisition
+# Paperspace / cloud GPU: install THIS first, then run scripts/fix_paperspace_torch.sh
+# (Do not pip-install torch from PyPI here — it breaks NVIDIA wheels on Gradient images.)
+numpy>=1.24.0
+scipy>=1.11.0
+pandas>=2.0.0
+matplotlib>=3.7.0
+scikit-learn>=1.3.0
+mne>=1.6.0
+brainflow>=5.0.0
+pygame>=2.5.0
+PyWavelets>=1.4.0
+joblib>=1.3.0
+tqdm>=4.65.0
+PyYAML>=6.0
+pytest>=7.4.0
+moabb>=1.0.0

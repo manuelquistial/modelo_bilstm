@@ -26,33 +26,59 @@ git clone https://github.com/manuelquistial/modelo_bilstm.git
 cd modelo_bilstm
 ```
 
-## 3. Entorno Python
+## 3. Entorno Python (importante: orden de instalación)
+
+En Paperspace **no** instales `torch` con `pip install -r requirements.txt` antes del fix: mezcla wheels de NVIDIA y rompe `libnvJitLink`.
 
 ```bash
+cd /notebooks/modelo_bilstm
+git pull
+
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -U pip wheel
 
-# PyTorch con CUDA (ajusta cu121/cu118 según la imagen de Paperspace)
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+# 1) Dependencias SIN torch
+pip install -r requirements-paperspace.txt
 
-pip install -r requirements.txt
-```
-
-Verifica GPU:
-
-```bash
-python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
-```
-
-Si falla con `undefined symbol: __nvJitLinkAddData_12_1` (conflicto entre wheels de NVIDIA y la imagen de Paperspace):
-
-```bash
+# 2) PyTorch GPU alineado (prueba cu124 → cu121 → cu118)
 chmod +x scripts/fix_paperspace_torch.sh
 ./scripts/fix_paperspace_torch.sh
 ```
 
-El script de importación BNCI **no necesita PyTorch**; si solo importas datos y ves ese error, haz `git pull` (imports perezosos) o ejecuta el fix anterior antes de entrenar.
+Verifica:
+
+```bash
+python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
+```
+
+### Si sigue `undefined symbol: __nvJitLink...`
+
+**Opción A — Reinstalar en limpio:**
+
+```bash
+source .venv/bin/activate
+./scripts/fix_paperspace_torch.sh
+```
+
+**Opción B — Venv con PyTorch del sistema (plantilla Gradient PyTorch):**
+
+```bash
+deactivate 2>/dev/null || true
+rm -rf .venv
+python3 -m venv .venv --system-site-packages
+source .venv/bin/activate
+pip install -r requirements-paperspace.txt
+python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
+```
+
+**Opción C — Solo CPU (entrena lento, sin GPU):**
+
+```bash
+TORCH_CPU=1 ./scripts/fix_paperspace_torch.sh
+```
+
+El import BNCI **no necesita** PyTorch; el entrenamiento sí.
 
 ## 4. Pipeline completo (datos sintéticos)
 
@@ -131,5 +157,5 @@ scp -r data/raw/S01 paperspace@<host>:~/modelo_bilstm/data/raw/
 | CUDA OOM | Reduce `batch_size` en `configs/training.yaml` |
 | pygame sin display | Usa `--no-gui` en adquisición o solo pipeline sintético |
 | MNE lento en CPU | Usa máquina con GPU; ICA es CPU-bound |
-| `libnvJitLink.so.12: undefined symbol` al importar | `./scripts/fix_paperspace_torch.sh` o reinstala torch cu121 tras `pip install -r requirements.txt` |
+| `libnvJitLink.so.12: undefined symbol` | `pip install -r requirements-paperspace.txt` luego `./scripts/fix_paperspace_torch.sh` (no uses `requirements.txt` antes del fix) |
 | `import_bnci2014_001` falla con error de `torch` | Actualiza el repo (`git pull`); el import no debe cargar CUDA |
