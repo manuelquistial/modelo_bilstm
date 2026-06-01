@@ -60,10 +60,11 @@ def _flatten_dim(
     se_reduction: int,
     conv1_padding: tuple[int, int],
     conv2_padding: tuple[int, int],
+    use_se: bool = True,
 ) -> int:
     front = _build_frontend(
         conv1_filters, conv1_kernel, conv2_filters, conv2_kernel,
-        pool_kernel, se_reduction, conv1_padding, conv2_padding, use_se=True,
+        pool_kernel, se_reduction, conv1_padding, conv2_padding, use_se=use_se,
     )
     with torch.no_grad():
         x = torch.zeros(1, 1, input_time, input_channels)
@@ -81,6 +82,7 @@ def discover_paddings_for_paper_flatten(
     pool_kernel: tuple[int, int] = (10, 1),
     se_reduction: int = 3,
     target: int = PAPER_FLATTEN_SIZE,
+    use_se: bool = True,
 ) -> tuple[tuple[int, int], tuple[int, int]]:
     """
     Search symmetric paddings so flatten size matches Table 1 (13080).
@@ -97,7 +99,7 @@ def discover_paddings_for_paper_flatten(
                 dim = _flatten_dim(
                     input_time, input_channels,
                     conv1_filters, conv1_kernel, conv2_filters, conv2_kernel,
-                    pool_kernel, se_reduction, pad1, pad2,
+                    pool_kernel, se_reduction, pad1, pad2, use_se=use_se,
                 )
             except Exception:
                 continue

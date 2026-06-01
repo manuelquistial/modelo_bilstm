@@ -9,7 +9,6 @@ import torch.nn as nn
 
 from src.models.paper_cnn_frontend import (
     PAPER_FLATTEN_SIZE,
-    PaperCNNSEFrontend,
     _build_frontend,
     discover_paddings_for_paper_flatten,
 )
@@ -34,9 +33,16 @@ class CNNLSTM(nn.Module):
     ) -> None:
         super().__init__()
         pad1, pad2 = discover_paddings_for_paper_flatten(
-            input_time, input_channels,
-            conv1_filters, conv1_kernel, conv2_filters, conv2_kernel,
-            pool_kernel, 3, flatten_size,
+            input_time,
+            input_channels,
+            conv1_filters,
+            conv1_kernel,
+            conv2_filters,
+            conv2_kernel,
+            pool_kernel,
+            3,
+            flatten_size,
+            use_se=False,
         )
         self.cnn = _build_frontend(
             conv1_filters, conv1_kernel, conv2_filters, conv2_kernel,
@@ -66,11 +72,15 @@ class CNNLSTM(nn.Module):
         ck2 = cfg.get("conv2_kernel", [15, 15])
         pk = cfg.get("pool_kernel", [10, 1])
         return cls(
+            input_time=cfg.get("input_time", 251),
+            input_channels=cfg.get("input_channels", 15),
             conv1_kernel=(int(ck1[0]), int(ck1[1])),
             conv2_kernel=(int(ck2[0]), int(ck2[1])),
             pool_kernel=(int(pk[0]), int(pk[1])),
             conv1_filters=cfg.get("conv1_filters", 16),
             conv2_filters=cfg.get("conv2_filters", 12),
             lstm_hidden=cfg.get("lstm_hidden", 16),
+            bidirectional=cfg.get("bidirectional", True),
             num_classes=cfg.get("num_classes", 2),
+            flatten_size=cfg.get("flatten_size", PAPER_FLATTEN_SIZE),
         )
