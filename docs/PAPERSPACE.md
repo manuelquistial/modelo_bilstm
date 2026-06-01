@@ -45,6 +45,15 @@ Verifica GPU:
 python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
 ```
 
+Si falla con `undefined symbol: __nvJitLinkAddData_12_1` (conflicto entre wheels de NVIDIA y la imagen de Paperspace):
+
+```bash
+chmod +x scripts/fix_paperspace_torch.sh
+./scripts/fix_paperspace_torch.sh
+```
+
+El script de importación BNCI **no necesita PyTorch**; si solo importas datos y ves ese error, haz `git pull` (imports perezosos) o ejecuta el fix anterior antes de entrenar.
+
 ## 4. Pipeline completo (datos sintéticos)
 
 ```bash
@@ -122,3 +131,5 @@ scp -r data/raw/S01 paperspace@<host>:~/modelo_bilstm/data/raw/
 | CUDA OOM | Reduce `batch_size` en `configs/training.yaml` |
 | pygame sin display | Usa `--no-gui` en adquisición o solo pipeline sintético |
 | MNE lento en CPU | Usa máquina con GPU; ICA es CPU-bound |
+| `libnvJitLink.so.12: undefined symbol` al importar | `./scripts/fix_paperspace_torch.sh` o reinstala torch cu121 tras `pip install -r requirements.txt` |
+| `import_bnci2014_001` falla con error de `torch` | Actualiza el repo (`git pull`); el import no debe cargar CUDA |
