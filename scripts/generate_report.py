@@ -20,6 +20,13 @@ from src.utils.constants import PAPER_REFERENCE_METRICS
 from src.utils.logging import setup_logger
 
 
+def _dataframe_to_markdown(df: pd.DataFrame) -> str:
+    try:
+        return df.to_markdown(index=False)
+    except ImportError:
+        return "```\n" + df.to_string(index=False) + "\n```"
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     args = parser.parse_args()
@@ -77,7 +84,7 @@ def main() -> None:
     md_lines = [
         "# Sun et al. 2026 — Results Report\n",
         "## Average metrics by model\n",
-        summary.to_markdown(index=False) if hasattr(summary, "to_markdown") else summary.to_string(),
+        _dataframe_to_markdown(summary),
         "\n## Paper reference (do not expect exact match on synthetic data)\n",
     ]
     for model, ref in PAPER_REFERENCE_METRICS.items():
