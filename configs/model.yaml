@@ -1,6 +1,6 @@
 proposed:
   input_time: 251
-  input_channels: 15
+  input_channels: 22
   conv1_filters: 16
   conv1_kernel: [10, 10]
   conv2_filters: 12
@@ -16,7 +16,7 @@ proposed:
 
 cnn_lstm:
   input_time: 251
-  input_channels: 15
+  input_channels: 22
   conv1_filters: 16
   conv1_kernel: [10, 10]
   conv2_filters: 12
@@ -28,7 +28,7 @@ cnn_lstm:
 
 eegnet:
   input_time: 251
-  input_channels: 15
+  input_channels: 22
   F1: 8
   D: 2
   F2: 16
@@ -38,7 +38,7 @@ eegnet:
 
 convnet:
   input_time: 251
-  input_channels: 15
+  input_channels: 22
   dropout: 0.5
   num_classes: 2
 

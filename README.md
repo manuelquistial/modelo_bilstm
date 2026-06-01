@@ -5,7 +5,9 @@ Reproducible implementation of **“Bridging minds and limbs: novel hybrid deep 
 **Repositorio:** [github.com/manuelquistial/modelo_bilstm](https://github.com/manuelquistial/modelo_bilstm)  
 **Clone SSH:** `git@github.com:manuelquistial/modelo_bilstm.git`
 
-Binary task: **class 0** = imagine lifting **left** thigh; **class 1** = imagine lifting **right** thigh.
+**Default dataset:** [BNCI2014_001](https://moabb.neurotechx.com/docs/generated/moabb.datasets.BNCI2014_001.html) via MOABB — binary **left hand vs right hand** motor imagery (9 subjects, 22 EEG channels @ 125 Hz after import).
+
+The Sun et al. paper used a private **lower-limb** OpenBCI cohort (15 channels); this repo keeps the same CNN-SE-BiLSTM pipeline and train/test protocol on BNCI for reproducible public benchmarks.
 
 ## Paperspace (GPU en la nube)
 
@@ -67,16 +69,15 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Quick start (synthetic data — no hardware)
+## Quick start (BNCI2014_001 — default)
 
 ```bash
-# 1. Synthetic raw EEG (10 subjects × 3 sessions × 50 trials)
-python scripts/generate_synthetic_data.py
+pip install -r requirements.txt
 
-# 2. Preprocess → trials.npz (150, 501, 15) per subject
-python scripts/run_preprocessing.py --input data/sample --output data/processed
+# 1. Download + import MOABB BNCI2014_001 → data/processed/S01..S09/trials.npz
+python scripts/import_bnci2014_001.py --output data/processed
 
-# 3. Train proposed model (one subject; use --quick-epochs 5 for smoke test)
+# 2. Train proposed model (one subject; use --quick-epochs 5 for smoke test)
 python scripts/run_training_subject.py --subject S01 --model proposed --quick-epochs 5
 
 # 4. All baselines (uses quick epochs for DL by default)
@@ -95,6 +96,24 @@ python scripts/generate_report.py
 # Tests
 pytest tests/ -q
 ```
+
+Optional: only one subject for a fast check:
+
+```bash
+python scripts/import_bnci2014_001.py --output data/processed --subjects 1
+```
+
+## Quick start (synthetic data — smoke test without download)
+
+```bash
+python scripts/generate_synthetic_data.py
+python scripts/run_preprocessing.py --input data/sample --output data/processed
+# Use synthetic dataset config (15 channels):
+# copy configs/dataset_synthetic.yaml → configs/dataset.yaml
+python scripts/run_training_subject.py --subject S01 --model proposed --quick-epochs 5
+```
+
+Or on Paperspace: `DATA_SOURCE=synthetic ./scripts/paperspace_run_all.sh`
 
 ## Real OpenBCI acquisition
 
@@ -120,17 +139,18 @@ data/raw/S01/session_01/
   eeg_raw.csv      # timestamp + 15 channels @ 1000 Hz
   events.csv       # trial timing and labels
 data/processed/S01/
-  trials.npz       # X (150,501,15), y, trial_ids, session_ids
+  trials.npz       # BNCI: X (~288,501,22); synthetic: (150,501,15)
+  import_meta.json # present when imported from MOABB
 ```
 
 ## Model input shapes (Table 1)
 
 | Stage | Shape |
 |-------|--------|
-| Trial (processed) | `(150, 501, 15)` |
-| Train segment (expansion) | `(630, 251, 15)` per subject (105×6) |
-| Test trials | `(45, 501, 15)` — metrics at **trial level** |
-| CNN input | `(batch, 251, 15)` |
+| Trial (processed, BNCI) | `(n_trials, 501, 22)` — ~288 trials/subject |
+| Train segment (expansion) | `(n_train×6, 251, n_ch)` |
+| Test trials | `(n_test, 501, n_ch)` — metrics at **trial level** |
+| CNN input | `(batch, 251, n_ch)` — `n_ch=22` for BNCI |
 | After Flatten | `(batch, 13080)` |
 | BiLSTM | `(batch, 1, 13080)` → hidden 16×2 |
 | Logits | `(batch, 2)` |
@@ -157,7 +177,7 @@ Normalization: channel z-score fit **only** on training segments.
 | CNN-LSTM | 0.680 | 0.348 | 0.675 |
 | **Proposed** | **0.721** | **0.436** | **0.699** |
 
-Exact numbers require the authors’ private dataset; synthetic data will not match these values.
+Exact numbers require the authors’ private dataset; **BNCI2014_001** and synthetic data will not match those values.
 
 ## PSO
 

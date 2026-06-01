@@ -1,3 +1,6 @@
+# BNCI Horizon 2014-001 (MOABB) — default dataset
+# Motor imagery: left hand vs right hand (n_classes=2)
+data_source: BNCI2014_001
 subjects:
   - S01
   - S02
@@ -8,32 +11,37 @@ subjects:
   - S07
   - S08
   - S09
-  - S10
 channel_names:
   - Fz
-  - F3
-  - F4
-  - F7
-  - F8
-  - Cz
+  - FC3
+  - FC1
+  - FCz
+  - FC2
+  - FC4
+  - C5
   - C3
+  - C1
+  - Cz
+  - C2
   - C4
-  - T3
-  - T4
+  - C6
+  - CP3
+  - CP1
+  - CPz
+  - CP2
+  - CP4
+  - P1
   - Pz
-  - P3
-  - P4
-  - T5
-  - T6
+  - P2
+  - POz
 class_names:
-  0: left_thigh_mi
-  1: right_thigh_mi
+  0: left_hand_mi
+  1: right_hand_mi
 train_ratio: 0.70
 test_ratio: 0.30
 split_seed: 42
 window_size: 251
 step_size: 50
 n_segments_per_trial: 6
-# Paper §2.3: expansion only on train; no extra normalization in MATLAB pipeline
 paper_mode: true
 channel_normalize: false

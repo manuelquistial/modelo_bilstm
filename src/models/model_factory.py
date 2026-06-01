@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 from typing import Any
 
 import torch.nn as nn
@@ -10,6 +11,15 @@ from src.models.cnn_lstm import CNNLSTM
 from src.models.cnn_se_bilstm import CNNSEBiLSTM
 from src.models.convnet import ConvNet
 from src.models.eegnet import EEGNet
+
+
+def sync_model_input_channels(model_cfg: dict[str, Any], n_channels: int) -> dict[str, Any]:
+    """Copy config and set input_channels for all DL model sections."""
+    cfg = copy.deepcopy(model_cfg)
+    for key in ("proposed", "cnn_lstm", "eegnet", "convnet"):
+        if key in cfg and isinstance(cfg[key], dict):
+            cfg[key]["input_channels"] = n_channels
+    return cfg
 
 
 def build_model(model_name: str, model_cfg: dict[str, Any]) -> nn.Module:

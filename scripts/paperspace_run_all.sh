@@ -15,11 +15,19 @@ python -c "import torch; print('CUDA:', torch.cuda.is_available(), getattr(torch
 echo "==> Install dependencies (skip if already installed)"
 pip install -q -r requirements.txt
 
-echo "==> Generate synthetic data"
-python scripts/generate_synthetic_data.py
-
-echo "==> Preprocess"
-python scripts/run_preprocessing.py --input data/sample --output data/processed
+DATA_SOURCE="${DATA_SOURCE:-bnci}"
+if [ "$DATA_SOURCE" = "synthetic" ]; then
+  echo "==> Generate synthetic data (DATA_SOURCE=synthetic)"
+  python scripts/generate_synthetic_data.py
+  echo "==> Preprocess synthetic"
+  python scripts/run_preprocessing.py --input data/sample --output data/processed
+elif [ "$DATA_SOURCE" = "bnci" ]; then
+  echo "==> Import BNCI2014_001 (MOABB; first run downloads data)"
+  python scripts/import_bnci2014_001.py --output data/processed
+else
+  echo "Unknown DATA_SOURCE=$DATA_SOURCE (use bnci or synthetic)" >&2
+  exit 1
+fi
 
 QUICK="${QUICK_EPOCHS:-10}"
 echo "==> Train proposed model (all subjects, epochs=$QUICK)"

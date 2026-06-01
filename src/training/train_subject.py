@@ -16,7 +16,11 @@ from src.evaluation.evaluator import (
     save_predictions,
     save_trial_predictions,
 )
-from src.models.model_factory import build_model, build_model_with_params
+from src.models.model_factory import (
+    build_model,
+    build_model_with_params,
+    sync_model_input_channels,
+)
 from src.training.trainer import Trainer
 from src.utils.config import load_config, project_root
 from src.utils.device import get_device
@@ -82,6 +86,9 @@ def train_subject(
         dataset_cfg,
         use_internal_val=training_cfg.get("use_internal_val", False),
     )
+
+    n_channels = int(prepared["test_trials"]["X"].shape[-1])
+    model_cfg = sync_model_input_channels(model_cfg, n_channels)
 
     loaders = make_dataloaders(
         prepared,

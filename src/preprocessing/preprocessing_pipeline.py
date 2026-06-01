@@ -10,7 +10,11 @@ import numpy as np
 import pandas as pd
 
 from src.preprocessing.artifact_removal import run_ica
-from src.preprocessing.epoching import build_mne_raw, extract_mi_epochs
+from src.preprocessing.epoching import (
+    build_mne_raw,
+    extract_mi_epochs,
+    load_eeg_matrix_from_csv,
+)
 from src.preprocessing.filters import filter_raw
 from src.preprocessing.quality_checks import check_epoch_shape, check_labels_binary
 from src.preprocessing.resampling import resample_raw
@@ -23,12 +27,13 @@ logger = logging.getLogger(__name__)
 def load_raw_subject_session(
     subject_dir: Path,
     channel_names: list[str] | None = None,
-) -> tuple[list[np.ndarray], list[pd.DataFrame], list[int]]:
+) -> tuple[list[np.ndarray], list[pd.DataFrame], list[int], list[float]]:
     """Load all sessions for a subject from raw CSV files."""
     channel_names = channel_names or CHANNEL_NAMES
     eeg_list: list[np.ndarray] = []
     events_list: list[pd.DataFrame] = []
     session_ids: list[int] = []
+    time_offsets: list[float] = []
 
     sessions = sorted(subject_dir.glob("session_*"))
     for sess_path in sessions:
@@ -37,14 +42,13 @@ def load_raw_subject_session(
         if not eeg_path.exists() or not ev_path.exists():
             logger.warning("Skipping incomplete session: %s", sess_path)
             continue
-        df_eeg = pd.read_csv(eeg_path)
-        ch_cols = [c for c in channel_names if c in df_eeg.columns]
-        eeg = df_eeg[ch_cols].values.T  # (n_ch, n_times)
-        eeg_list.append(eeg.astype(np.float64))
+        eeg, t_off = load_eeg_matrix_from_csv(eeg_path, channel_names)
+        eeg_list.append(eeg)
         events_list.append(pd.read_csv(ev_path))
+        time_offsets.append(t_off)
         sid = int(sess_path.name.split("_")[-1])
         session_ids.append(sid)
-    return eeg_list, events_list, session_ids
+    return eeg_list, events_list, session_ids, time_offsets
 
 
 def preprocess_session(
@@ -52,6 +56,7 @@ def preprocess_session(
     events_df: pd.DataFrame,
     config: dict[str, Any],
     channel_names: list[str] | None = None,
+    time_offset: float = 0.0,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Preprocess one session."""
     channel_names = channel_names or CHANNEL_NAMES
@@ -66,7 +71,7 @@ def preprocess_session(
             raw,
             n_components=config.get("ica_n_components", 0.95),
             random_state=config.get("ica_random_state", 42),
-            max_iter=config.get("ica_max_iter", 500),
+            max_iter=config.get("ica_max_iter", 800),
         )
     X, y, trial_ids = extract_mi_epochs(
         raw,
@@ -74,6 +79,7 @@ def preprocess_session(
         tmin=config.get("epoch_tmin", 2.0),
         tmax=config.get("epoch_tmax", 6.0),
         expected_samples=config.get("expected_epoch_samples", 501),
+        time_offset=time_offset,
     )
     return X, y, trial_ids
 
@@ -91,14 +97,16 @@ def preprocess_subject(
     if not subject_path.exists():
         raise FileNotFoundError(f"Subject directory not found: {subject_path}")
 
-    eeg_list, events_list, session_nums = load_raw_subject_session(subject_path, channel_names)
+    eeg_list, events_list, session_nums, time_offsets = load_raw_subject_session(
+        subject_path, channel_names
+    )
     all_X: list[np.ndarray] = []
     all_y: list[np.ndarray] = []
     all_tids: list[np.ndarray] = []
     all_sess: list[np.ndarray] = []
 
-    for eeg, ev, sid in zip(eeg_list, events_list, session_nums):
-        X, y, tids = preprocess_session(eeg, ev, config, channel_names)
+    for eeg, ev, sid, t_off in zip(eeg_list, events_list, session_nums, time_offsets):
+        X, y, tids = preprocess_session(eeg, ev, config, channel_names, time_offset=t_off)
         all_X.append(X)
         all_y.append(y)
         all_tids.append(tids)

@@ -107,14 +107,15 @@ def generate_subject(
 
         for _, row in events.iterrows():
             label = int(row["label"])
+            trial_start = float(row["trial_start"])
             trial_eeg = _generate_trial_eeg(
                 label, samples_per_trial, n_channels, sfreq, rng
             )
             n_samp = trial_eeg.shape[1]
-            ts = global_t + np.arange(n_samp) / sfreq
+            ts = trial_start + np.arange(n_samp) / sfreq
             eeg_chunks.append(trial_eeg.T)
             timestamps.append(ts)
-            global_t = float(ts[-1]) + 1.0 / sfreq + 1.0
+            global_t = float(row["trial_end"]) + 1.0
 
         eeg_matrix = np.vstack(eeg_chunks)
         ts_all = np.concatenate(timestamps)

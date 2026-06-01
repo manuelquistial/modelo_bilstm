@@ -57,8 +57,11 @@ O paso a paso:
 ```bash
 export PYTHONPATH="${PWD}:${PYTHONPATH}"
 
-python scripts/generate_synthetic_data.py
-python scripts/run_preprocessing.py --input data/sample --output data/processed
+# Default: BNCI2014_001 (MOABB; primera vez descarga ~1 GB)
+python scripts/import_bnci2014_001.py --output data/processed
+
+# Alternativa sin descarga:
+# DATA_SOURCE=synthetic ./scripts/paperspace_run_all.sh
 python scripts/run_training_all_subjects.py --model proposed
 python scripts/run_baselines.py --all-subjects --quick-epochs 50
 python scripts/generate_report.py
