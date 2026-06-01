@@ -1,0 +1,13 @@
+raw_sfreq: 1000
+target_sfreq: 125
+highpass: 1.0
+lowpass: 40.0
+ica_enabled: true
+ica_n_components: 0.95
+ica_random_state: 42
+ica_max_iter: 500
+epoch_tmin: 2.0
+epoch_tmax: 6.0
+expected_epoch_samples: 501
+reference: average
+montage: standard_1020

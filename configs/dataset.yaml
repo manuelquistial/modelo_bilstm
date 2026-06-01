@@ -1,0 +1,39 @@
+subjects:
+  - S01
+  - S02
+  - S03
+  - S04
+  - S05
+  - S06
+  - S07
+  - S08
+  - S09
+  - S10
+channel_names:
+  - Fz
+  - F3
+  - F4
+  - F7
+  - F8
+  - Cz
+  - C3
+  - C4
+  - T3
+  - T4
+  - Pz
+  - P3
+  - P4
+  - T5
+  - T6
+class_names:
+  0: left_thigh_mi
+  1: right_thigh_mi
+train_ratio: 0.70
+test_ratio: 0.30
+split_seed: 42
+window_size: 251
+step_size: 50
+n_segments_per_trial: 6
+# Paper §2.3: expansion only on train; no extra normalization in MATLAB pipeline
+paper_mode: true
+channel_normalize: false

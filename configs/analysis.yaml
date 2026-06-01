@@ -1,0 +1,17 @@
+bands:
+  mu: [8, 12]
+  beta: [13, 30]
+erd_baseline: [0, 2]
+erd_task: [2, 6]
+erd_channels:
+  - C3
+  - C4
+processed_data_dir: data/processed
+raw_data_dir: data/sample
+results_psd_dir: results/psd
+results_erd_dir: results/erd
+channel_montage_map:
+  T3: T7
+  T4: T8
+  T5: P7
+  T6: P8

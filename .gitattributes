@@ -1,0 +1,7 @@
+* text=auto eol=lf
+*.sh text eol=lf
+*.py text eol=lf
+*.yaml text eol=lf
+*.csv linguist-generated
+*.npz binary
+*.pt binary

@@ -1,0 +1,62 @@
+proposed:
+  input_time: 251
+  input_channels: 15
+  conv1_filters: 16
+  conv1_kernel: [10, 10]
+  conv2_filters: 12
+  conv2_kernel: [15, 15]
+  pool_kernel: [10, 1]
+  se_reduction: 3
+  flatten_size: 13080
+  strict_flatten: true
+  lstm_hidden: 16
+  bidirectional: true
+  num_classes: 2
+  log_shapes: false
+
+cnn_lstm:
+  input_time: 251
+  input_channels: 15
+  conv1_filters: 16
+  conv1_kernel: [10, 10]
+  conv2_filters: 12
+  conv2_kernel: [15, 15]
+  pool_kernel: [10, 1]
+  lstm_hidden: 16
+  bidirectional: true
+  num_classes: 2
+
+eegnet:
+  input_time: 251
+  input_channels: 15
+  F1: 8
+  D: 2
+  F2: 16
+  kernel_length: 64
+  dropout: 0.5
+  num_classes: 2
+
+convnet:
+  input_time: 251
+  input_channels: 15
+  dropout: 0.5
+  num_classes: 2
+
+csp_svm:
+  n_components: 4
+  svm_kernel: rbf
+  grid_search: true
+  cv_folds: 3
+  seed: 42
+
+eff_knn:
+  n_neighbors: 5
+  weights: distance
+  algorithm: ball_tree
+  metric: minkowski
+
+knn:
+  n_neighbors: 5
+  weights: distance
+  algorithm: ball_tree
+  metric: minkowski

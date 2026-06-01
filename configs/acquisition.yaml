@@ -1,0 +1,30 @@
+board_id: 0  # CYTON_BOARD = 0 in BrainFlow
+serial_port: ""
+ip_address: "192.168.4.1"
+ip_port: 6677
+sampling_rate: 1000
+n_channels: 16
+channel_names:
+  - Fz
+  - F3
+  - F4
+  - F7
+  - F8
+  - Cz
+  - C3
+  - C4
+  - T3
+  - T4
+  - Pz
+  - P3
+  - P4
+  - T5
+  - T6
+output_dir: data/raw
+trial_duration_sec: 10.0
+prep_duration_sec: 2.0
+cue_duration_sec: 4.0
+rest_duration_sec: 4.0
+n_sessions: 3
+trials_per_session: 50
+trials_per_class_per_session: 25
