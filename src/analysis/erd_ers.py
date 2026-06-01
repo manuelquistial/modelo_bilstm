@@ -9,6 +9,7 @@ from typing import Any
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from scipy.integrate import trapezoid
 from scipy.signal import welch
 
 from src.preprocessing.epoching import build_mne_raw
@@ -23,7 +24,7 @@ logger = logging.getLogger(__name__)
 def band_power(sig: np.ndarray, sfreq: float, band: tuple[float, float]) -> float:
     freqs, psd = welch(sig, fs=sfreq, nperseg=min(256, len(sig)))
     idx = (freqs >= band[0]) & (freqs <= band[1])
-    return float(np.trapz(psd[idx], freqs[idx]))
+    return float(trapezoid(psd[idx], freqs[idx]))
 
 
 def erd_percent(power_task: float, power_baseline: float) -> float:

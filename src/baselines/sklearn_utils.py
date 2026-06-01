@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
+from scipy.integrate import trapezoid
 from scipy.signal import welch
 
 
@@ -40,4 +41,4 @@ def _bandpower(
 ) -> float:
     freqs, psd = welch(sig, fs=sfreq, nperseg=min(256, len(sig)))
     idx = (freqs >= band[0]) & (freqs <= band[1])
-    return float(np.trapz(psd[idx], freqs[idx]))
+    return float(trapezoid(psd[idx], freqs[idx]))
